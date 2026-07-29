@@ -29,7 +29,7 @@ Python `ctypes` bindings for [ediFabric Native](https://www.edifabric.com/edifab
 [Download **ediFabric Native**](https://support.edifabric.com/hc/en-us/articles/37289848931869-Download)
 
 Plus your **model files** (per transaction set) and a **map file** that tells the
-engine where to find them. See [Configuration JSON](#configuration-json) for details.
+engine where to find them. See [Model map](#model-map) for details.
 
 ## Getting started
 
