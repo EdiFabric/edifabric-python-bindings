@@ -1,6 +1,12 @@
 # ediFabric Native X12 — Python bindings
 
-Python `ctypes` bindings for [ediFabric Native](https://www.edifabric.com/edifabric-native.html), a self-contained EDI X12 engine compiled ahead of time to a native shared library. Parse X12 to JSON, validate, acknowledge, split, merge, and build EDI back — with no .NET runtime, JVM, or pip dependencies.
+**ediFabric Native** is a self-contained, high-performance X12 EDI native shared library. It converts X12 EDI to JSON (and back),
+validates transaction sets, and generates acknowledgments — callable from **any
+language with a C foreign-function interface** (C, C++, Rust, Go, Python, Node.js,
+Java/JNA, .NET, …). No .NET runtime, JVM, or other dependency is required on the
+target machine.
+
+Python `ctypes` bindings for [ediFabric Native](https://www.edifabric.com/edifabric-native.html).
 
 | File | Purpose |
 | --- | --- |
@@ -20,10 +26,14 @@ Python `ctypes` bindings for [ediFabric Native](https://www.edifabric.com/edifab
 | Linux | `edifabric-x12-tools.so` |
 | macOS | `edifabric-x12-tools.dylib` |
 
-- Internet access for the one-time license install and for token retrieval
+[Download **ediFabric Native**](https://support.edifabric.com/hc/en-us/articles/37289848931869-Download)
+
+Plus your **model files** (per transaction set) and a **map file** that tells the
+engine where to find them. See [Model map](#model-map) for details.
 
 ## Getting started
 
+**Download the library** from [here](https://support.edifabric.com/hc/en-us/articles/37289848931869-Download).
 Put the native library beside `edifabric_x12.py`, then run the walkthrough:
 
 ```bash
@@ -44,12 +54,15 @@ Options:
 ```bash
 python example_all_functions.py --serial YOUR_SERIAL   # use your own license
 python example_all_functions.py --lib /opt/edifabric   # library file or folder
-python example_all_functions.py --skip-network         # authorize with set_serial only
 ```
 
 The library path is resolved from `--lib`, then `EDIFABRIC_X12_LIB`, then the
 module folder, its parent, and the working directory. The serial comes from
 `--serial`, then `EDIFABRIC_SERIAL`, then the built-in free plan serial.
+
+All strings and payloads cross the boundary as **UTF‑8 byte buffers**
+(`pointer + length`). Every function returns `0` on success or a non-zero
+[error code](#error-codes).
 
 ## Usage
 
@@ -60,7 +73,7 @@ import edifabric_x12 as ef
 serial = "your-serial"
 
 ef.load_library()                  # or ef.load_library(r"C:\libs\edifabric-x12-tools.dll")
-ef.set_serial(serial)              # or ef.set_token(token) for offline use
+ef.set_serial(serial)              # or ef.set_token(token) for offline use (only available for the Enterprise license)
 ef.set_map(json.dumps({"default": serial, "maps": {}}))
 
 edi = open("purchase-order.edi", "rb").read()
@@ -73,7 +86,7 @@ Read a file from a subfolder of the script:
 ```python
 from pathlib import Path
 
-edi = (Path(__file__).resolve().parent / "samples" / "purchase-order.edi").read_bytes()
+edi = (Path(__file__).resolve().parent / "edi" / "838p.txt").read_bytes()
 ```
 
 ### Validation and acknowledgments
@@ -130,6 +143,15 @@ edi_text = ef.build(transactions, postfix="\r\n")   # postfix=None for compact o
 
 ## API reference
 
+Conventions used by every function:
+
+- Returns `int`: `0` = success, non-zero = [error code](#error-codes).
+- Inputs are UTF‑8 `byte*` + `int length`.
+- Output functions use **grow-and-retry**: if the buffer is too small the call
+  returns `1` (`InsufficientCapacity`) and writes the required size into the
+  length out-parameter; reallocate and call again.
+- Exceptions never cross the boundary.
+
 Every wrapper raises `EdiFabricError` when the native call returns a non-zero
 status. Buffer growth (`InsufficientCapacity`) is retried automatically.
 
@@ -150,6 +172,15 @@ to the C runtime `free`.
 
 ## Licensing
 
+> [!NOTE]
+> The examples are available with a free plan which can be used only with Serial model validation. 
+> You don't need to call `install_license` with the free plan, and the only licensing call must be `set_serial`.
+
+The serial key for the free plan is:
+```
+bd96a836feca45cb91c86ee65d281f52
+```
+
 Two models are supported. Tokens are recommended for containers, air-gapped
 machines, and high volume; serials are simplest when always online.
 
@@ -163,9 +194,6 @@ print(ef.get_token_expiration())   # .NET UTC ticks, 0 when unset
 ef.install_license(serial)
 ef.set_serial(serial)
 ```
-
-The example caches its token in `.edifabric_token`. Add that file to
-`.gitignore` before committing.
 
 ## Model map
 
@@ -183,8 +211,69 @@ sets through the online spec service, or leave it `null` and map everything loca
 }
 ```
 
-Download models in ediFabric Native format from the EdiNation Spec Library, or
-build custom ones in the EdiNation Spec Builder.
+All X12 transactions, such as 837P, 834, 850, etc. are represented as proprietary JSON. 
+Download a standard model from [EdiNation Spec Library](https://edination.edifabric.com/edi-spec-library.html), 
+or a custom model from [EdiNation Spec Builder](https://edination.edifabric.com/edi-spec-builder.html). 
+Create/modify models in OpenEDI format, upload them in EdiNation Spec Builder and download them as JSON for use in ediFabric Native.
+
+To download a model in either EdiNation Spec Library or EdiNation Spec Builder, 
+select the model first, then in the JSON view 
+select the Download button in the top right corner.
+
+![Model Img](https://github.com/EdiFabric/native-python-examples/blob/main/model.png)
+
+Choose to download as **ediFabric Native**.
+
+## Configuration JSON
+
+All JSON uses **`snake_case`** keys and is case-insensitive.
+
+### ParseConfig (`parse`)
+
+```json
+{
+  "validate": { "regex": null, "date_format": null, "time_format": null,
+                "skip_seq_count": false, "skip_hl_seq": false,
+                "snip_level": 0, "max_errors": 0 },
+  "ack":      { "supress_ta1": false, "ak901p": false,
+                "gen_for_valid": false, "gen997": false }
+}
+```
+
+- `validate` — applied when `mode ≥ 2`; `snip_level` is `1`–`4`.
+- `ack` — applied when `mode == 3`.
+
+All sections are optional for `parse`.
+
+### SplitConfig (`start_split`)
+
+```json
+{
+  "split":    { "segment_id": "ST", "segment_depth": 0, "loop_id": null }
+}
+```
+
+- `split` — required for `start_split`.
+
+Splitting is possible for the following boundaries:
+
+- Transaction - for files that contain batches of transactions.
+- Repeating loop - for files that contain batches of loops, such as order lines, claims or benefit enrollments.
+
+The splitter must be configured as follows:
+
+- `segment_id`  — the name of the segment to split by. It must be either ST or the first segment in the repeatable loop (Mandatory).
+- `segment_depth` — the depth of the segment in the model hierarchy (Mandatory).
+- `loop_id` — the name of the loop for the segment specified in segment_id (Optional).
+
+The values for the splitter can be found in EdiNation by loading a sample file. For example, if you want to split by loop 2000A in 837P, load an 837P file in EdiNation (or use the example one), click on the first segment in that loop, e.g., HL. `segment_id` is **CODE**,  `loop_id` is the last item in **PATH**, and `segment_depth` is **DEPTH**.
+
+> [!NOTE]
+> If a segment does not show a SPLITTER copy button, than splitting is not possible by that segment.
+
+The easiest way to get the splitter configuration is to click on the copy button under SPLITTER that has the full splitter JSON pre-configured.
+
+![Model Img](https://github.com/EdiFabric/native-python-examples/blob/main/splitter.png)
 
 ## Threading
 
