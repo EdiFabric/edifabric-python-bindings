@@ -1,6 +1,17 @@
 # ediFabric Native X12 — Python bindings
 
-Python `ctypes` bindings for [ediFabric Native](https://www.edifabric.com/edifabric-native.html), a self-contained EDI X12 engine compiled ahead of time to a native shared library. Parse X12 to JSON, validate, acknowledge, split, merge, and build EDI back — with no .NET runtime, JVM, or pip dependencies.
+**ediFabric Native** is a self-contained, high-performance X12 EDI native shared library. It converts X12 EDI to JSON (and back),
+validates transaction sets, and generates acknowledgments — callable from **any
+language with a C foreign-function interface** (C, C++, Rust, Go, Python, Node.js,
+Java/JNA, .NET, …). No .NET runtime, JVM, or other dependency is required on the
+target machine.
+
+- **Safe** — all operations run locally, and your data never leaves the process where the library is executed
+- **Fast** — native code, zero-copy UTF‑8 buffers, streaming split/merge.
+- **Portable** — a single native library per platform, no runtime install.
+- **Simple ABI** — a handful of C entry points returning integer status codes.
+
+Python `ctypes` bindings for [ediFabric Native](https://www.edifabric.com/edifabric-native.html).
 
 | File | Purpose |
 | --- | --- |
