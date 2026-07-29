@@ -26,10 +26,9 @@ Python `ctypes` bindings for [ediFabric Native](https://www.edifabric.com/edifab
 | Linux | `edifabric-x12-tools.so` |
 | macOS | `edifabric-x12-tools.dylib` |
 
-- Internet access for the one-time license install and for token retrieval
-
 ## Getting started
 
+**Download the library** from [here](https://support.edifabric.com/hc/en-us/articles/37289848931869-Download).
 Put the native library beside `edifabric_x12.py`, then run the walkthrough:
 
 ```bash
