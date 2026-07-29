@@ -26,7 +26,7 @@ Python `ctypes` bindings for [ediFabric Native](https://www.edifabric.com/edifab
 | Linux | `edifabric-x12-tools.so` |
 | macOS | `edifabric-x12-tools.dylib` |
 
-[Download **ediFabric Native**](https://support.edifabric.com/hc/en-us/articles/37289848931869-Download)
+[Download **ediFabric Native** Library](https://support.edifabric.com/hc/en-us/articles/37289848931869-Download)
 
 Plus your **model files** (per transaction set) and a **map file** that tells the
 engine where to find them. See [Model map](#model-map) for details.
@@ -118,7 +118,7 @@ print(report["errors_count"], report["ack"])
 memory use. `segment_id` must be `ST` or the first segment of a repeating loop.
 
 ```python
-config = json.dumps({"split": {"segment_id": "ST", "segment_depth": 0, "loop_id": None}})
+config = json.dumps({"split": {"segment_id": "LX", "segment_depth": 6, "loop_id": "2400"}})
 
 for payload, offset, is_last in ef.iter_split(edi, ef.ParseMode.JSON, config):
     handle(json.loads(payload))
@@ -289,6 +289,9 @@ are exposed as `ErrorCode`, and `get_error(code)` returns the message.
 
 | Code | Meaning |
 | --- | --- |
+| 501 | Unknown |
+| 502 | No internet access to the authentication API |
+| 503 | Local map file has invalid paths or file names |
 | 611 | Incorrect or empty input |
 | 612 | Logger initialization failed |
 | 613 | Map JSON could not be deserialized |
