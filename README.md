@@ -26,6 +26,11 @@ Python `ctypes` bindings for [ediFabric Native](https://www.edifabric.com/edifab
 | Linux | `edifabric-x12-tools.so` |
 | macOS | `edifabric-x12-tools.dylib` |
 
+[Download **ediFabric Native**](https://support.edifabric.com/hc/en-us/articles/37289848931869-Download)
+
+Plus your **model files** (per transaction set) and a **map file** that tells the
+engine where to find them. See [Configuration JSON](#configuration-json) for details.
+
 ## Getting started
 
 **Download the library** from [here](https://support.edifabric.com/hc/en-us/articles/37289848931869-Download).
