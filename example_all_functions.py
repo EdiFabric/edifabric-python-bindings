@@ -249,7 +249,7 @@ def main() -> int:
     parser.add_argument(
         "--skip-network",
         action="store_true",
-        help="skip install_license and get_token, authorize with set_serial only",
+        help="skip ensure_token and get_token, authorize with set_serial only",
     )
     args = parser.parse_args()
 

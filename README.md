@@ -159,7 +159,7 @@ status. Buffer growth (`InsufficientCapacity`) is retried automatically.
 | --- | --- |
 | Loading | `load_library` |
 | Lifecycle | `init_logger`, `shutdown_logger`, `clear_cache` |
-| Licensing | `install_license`, `get_app_version`, `get_token`, `validate_token`, `set_token`, `get_token_expiration`, `set_serial` |
+| Licensing | `ensure_token`, `get_app_version`, `get_token`, `validate_token`, `set_token`, `get_token_expiration`, `set_serial` |
 | Model map | `set_map` |
 | Processing | `parse`, `start_split`, `split`, `build`, `start_merge`, `merge`, `get_result` |
 | Errors | `get_error`, `free_error`, `check` |
@@ -174,7 +174,7 @@ to the C runtime `free`.
 
 > [!NOTE]
 > The examples are available with a free plan which can be used only with Serial model validation. 
-> You don't need to call `install_license` with the free plan, and the only licensing call must be `set_serial`.
+> You don't need to call `ensure_token` with the free plan, and the only licensing call must be `set_serial`.
 
 The serial key for the free plan is:
 ```
@@ -185,13 +185,11 @@ Two models are supported. Tokens are recommended for containers, air-gapped
 machines, and high volume; serials are simplest when always online.
 
 ```python
-# Token: fetch once with internet access, cache it, set it at process start
-token = ef.get_token(serial)
-ef.set_token(token)
+# Token: cache a token, refreshing it if it expires within N seconds
+ef.ensure_token(serial, 3600)
 print(ef.get_token_expiration())   # .NET UTC ticks, 0 when unset
 
-# Serial: register the machine once, then authorize per process
-ef.install_license(serial)
+# Serial: authorize per process against the license server
 ef.set_serial(serial)
 ```
 
@@ -310,13 +308,16 @@ are exposed as `ErrorCode`, and `get_error(code)` returns the message.
 | 626 | `merge` called before `start_merge` |
 | 627 | Incorrect or null output pointer |
 | 628 | Incorrect serial |
-| 629 | License not installed, run `install_license` |
+| 629 | License not installed |
 | 630 | Application maximum version exceeded |
 | 631 | Token expired |
 | 632 | Token missing |
 | 633 | Maximum licenses exceeded |
 | 634 | License snapshot not found |
 | 635 | License not set, call `set_token` or `set_serial` |
+| 636 | Rate exceeded |
+| 637 | Invalid JSON |
+| 638 | Incorrect license |
 
 ## Troubleshooting
 
@@ -329,7 +330,7 @@ resets the map, so reload it afterwards.
 
 **Error 635 on parse** — authorize first with `set_token` or `set_serial`.
 
-**Error 633 on install_license** — the plan's machine quota is used up. Switch to
+**Error 633 on ensure_token** — the plan's machine quota is used up. Switch to
 token authorization or contact support.
 
 ## Links

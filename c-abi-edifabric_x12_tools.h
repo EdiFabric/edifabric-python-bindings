@@ -31,7 +31,7 @@ EDIFABRIC_API int  shutdown_logger(void);
 EDIFABRIC_API int  clear_cache(void);
 
 /* Licensing */
-EDIFABRIC_API int  install_license(const unsigned char* serial, int serial_len);
+EDIFABRIC_API int  ensure_token(const unsigned char* serial, int serial_len, int seconds);
 EDIFABRIC_API int  get_app_version(int* app_version);
 EDIFABRIC_API int  get_token(const unsigned char* serial, int serial_len,
                              unsigned char* output, int output_capacity, int* output_length);

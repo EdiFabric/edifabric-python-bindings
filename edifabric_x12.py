@@ -74,6 +74,9 @@ class ErrorCode(IntEnum):
     MAX_LICENSES_EXCEEDED = 633
     LICENSE_SNAPSHOT_MISSING = 634
     LICENSE_NOT_SET = 635
+    RATE_EXCEEDED = 636
+    INVALID_JSON = 637
+    INCORRECT_LICENSE = 638
 
 
 class EdiFabricError(RuntimeError):
@@ -131,7 +134,7 @@ def _bind(lib: ctypes.CDLL) -> None:
         "init_logger": ([buf, ctypes.c_int, ctypes.c_int], ctypes.c_int),
         "shutdown_logger": ([], ctypes.c_int),
         "clear_cache": ([], ctypes.c_int),
-        "install_license": ([buf, ctypes.c_int], ctypes.c_int),
+        "ensure_token": ([buf, ctypes.c_int, ctypes.c_int], ctypes.c_int),
         "get_app_version": ([c_int_p], ctypes.c_int),
         "get_token": ([buf, ctypes.c_int, buf, ctypes.c_int, c_int_p], ctypes.c_int),
         "validate_token": ([buf, ctypes.c_int], ctypes.c_int),
@@ -299,10 +302,15 @@ def clear_cache() -> None:
 # Licensing
 # ---------------------------------------------------------------------------
 
-def install_license(serial: BytesLike) -> None:
-    """Register this machine once. Requires internet access."""
+def ensure_token(serial: BytesLike, seconds: int) -> None:
+    """
+    Cache a token for runtime authorization against the license server.
+
+    Retrieves a new token if the cached token expires within the specified
+    number of seconds.
+    """
     buffer, length = _utf8(serial)
-    check(_lib().install_license(buffer, length), "install_license")
+    check(_lib().ensure_token(buffer, length, int(seconds)), "ensure_token")
 
 
 def get_app_version() -> int:
