@@ -259,18 +259,17 @@ same file works from any working directory:
 You can also mix both: keep `default` as your serial and add local entries under
 `maps` for the transaction sets you ship on disk.
 
-All X12 transactions, such as 837P, 834, 850, etc. are represented as proprietary JSON.
-Download a standard model from [EdiNation Spec Library](https://edination.edifabric.com/edi-spec-library.html),
-or a custom model from [EdiNation Spec Builder](https://edination.edifabric.com/edi-spec-builder.html).
-Create/modify models in OpenEDI format, upload them in EdiNation Spec Builder and download them as JSON for use in ediFabric Native.
+All X12 transactions, such as 837P, 834 and 850, are represented as ediFabric Native JSON models. The models are the same on every plan, Community or paid.
 
-To download a model in either EdiNation Spec Library or EdiNation Spec Builder,
-select the model first, then in the JSON view
-select the Download button in the top right corner.
+**Standard models** come from the [EDI spec library](https://www.edifabric.com/specs/index.html), and you can download them without an account. Open the transaction, for example [837P](https://www.edifabric.com/specs/x12/hipaa/005010/837p.html), and on the **ediFabric Native** tab select **Download Native**.
 
-![Model Img](https://github.com/EdiFabric/native-python-examples/blob/main/model.png)
+![The Download Native button on the ediFabric Native tab of 837P in the EDI spec library](model.png)
 
-Choose to download as **ediFabric Native**.
+**Custom models** come from the [EDI Spec Builder](https://www.edifabric.com/spec-builder/index.html). When a trading partner changes the standard, open the transaction in the EDI spec library and select **Customize in Spec Builder**, or import your own OpenEDI file. Edit the OpenEDI schema until it matches the partner's guide and select **Update**. Then, on the **ediFabric Native** tab, select **Download Native**.
+
+![The Download Native button on the ediFabric Native tab of a custom spec in the EDI Spec Builder](model-builder.png)
+
+Save the downloaded file where the map can name it, and add it to `maps` under its `message:version` key, for example `837:005010X222A1`. The file is the compiled layout the engine loads, not the OpenEDI schema. To change a model, edit the spec in the EDI Spec Builder and download it again. See [EDI models](https://www.edifabric.com/docs/edifabric-native/edi-models.html) and [OpenEDI format](https://www.edifabric.com/docs/getting-started/openedi-format.html).
 
 ## Configuration JSON
 
@@ -314,14 +313,14 @@ The splitter must be configured as follows:
 - `segment_depth` — the depth of the segment in the model hierarchy (Mandatory).
 - `loop_id` — the name of the loop for the segment specified in segment_id (Optional).
 
-The values for the splitter can be found in EdiNation by loading a sample file. For example, if you want to split by loop 2000A in 837P, load an 837P file in EdiNation (or use the example one), click on the first segment in that loop, e.g., HL. `segment_id` is **CODE**,  `loop_id` is the last item in **PATH**, and `segment_depth` is **DEPTH**.
+The values for the splitter are in [EdiNation](https://edination.edifabric.com/), the free X12 editor. Load a file, select **Parse**, and select the first segment of the loop in the **Structure** tab. For example, to split an 837P by loop 2000A, load the 837P sample from **Samples** and select the **HL** segment in loop 2000A. Under **Selected item**, `segment_id` is **Code**, `loop_id` is the last item in **Path**, and `segment_depth` is **Depth**.
 
 > [!NOTE]
-> If a segment does not show a SPLITTER copy button, than splitting is not possible by that segment.
+> If a segment shows no **Splitter**, the file can't be split by that segment.
 
-The easiest way to get the splitter configuration is to click on the copy button under SPLITTER that has the full splitter JSON pre-configured.
+The easiest way to get the splitter configuration is to select the copy button next to **Splitter**, which copies the three values as JSON. Paste them as the value of `split`.
 
-![Model Img](https://github.com/EdiFabric/native-python-examples/blob/main/splitter.png)
+![The Splitter of the HL segment in loop 2000A of an 837P, under Selected item in EdiNation](splitter.png)
 
 ## Threading
 
