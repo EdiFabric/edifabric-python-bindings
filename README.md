@@ -10,15 +10,28 @@ Python `ctypes` bindings for [ediFabric Native](https://www.edifabric.com/edifab
 
 | File | Purpose |
 | --- | --- |
-| `edifabric_x12.py` | ctypes bindings for the complete C ABI |
+| `edifabric_x12/` | ctypes bindings for the complete C ABI |
 | `example_all_functions.py` | runnable walkthrough of every entry point |
 | `c-abi-edifabric_x12_tools.h` | the C header these bindings mirror |
+| `PUBLISHING.md` | how the PyPI package is built and published |
+
+## Install
+
+```bash
+pip install edifabric-x12
+```
+
+The wheel for your platform includes the ediFabric Native library, so there is
+nothing else to download. Wheels are published for Windows x64, Linux x64 and
+arm64 (glibc 2.34 or later), and macOS arm64 (12 or later). A library you pass to
+`load_library(path)` or set in `EDIFABRIC_X12_LIB` takes precedence over the
+bundled one.
 
 ## Requirements
 
 - Python 3.8 or later (standard library only)
 - 64-bit Windows, Linux, or macOS
-- The native library for your platform:
+- The native library for your platform (bundled in the PyPI wheels; download it when you run from a clone):
 
 | Platform | File |
 | --- | --- |
@@ -37,7 +50,7 @@ engine where to find them. See [Model map](#model-map) for details.
 **Sign up free for Community** at [edifabric.com/pricing](https://www.edifabric.com/pricing.html)
 to get an evaluation serial key, then **download the library** from
 [here](https://www.edifabric.com/docs/edifabric-native/download.html).
-Put the native library beside `edifabric_x12.py`, then run the walkthrough with your serial:
+Put the native library in the repository root, beside the `edifabric_x12` folder, then run the walkthrough with your serial:
 
 ```bash
 python example_all_functions.py --serial YOUR_SERIAL
@@ -64,7 +77,8 @@ python example_all_functions.py --lib /opt/edifabric   # library file or folder
 You can also set `EDIFABRIC_SERIAL` instead of passing `--serial`.
 
 The library path is resolved from `--lib`, then `EDIFABRIC_X12_LIB`, then the
-module folder, its parent, and the working directory. The serial comes from
+package folder (where the wheel puts the bundled library), its parent, and the
+working directory. The serial comes from
 `--serial`, then `EDIFABRIC_SERIAL`.
 
 All strings and payloads cross the boundary as **UTF‑8 byte buffers**

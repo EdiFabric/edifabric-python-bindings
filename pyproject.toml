@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "edifabric-x12"
+version = "1.1.1"
+description = "Python bindings for ediFabric Native X12: convert X12 EDI to JSON and back, validate, and generate acknowledgments."
+readme = "README.md"
+requires-python = ">=3.8"
+license = "LicenseRef-EdiFabric-EULA"
+license-files = ["LICENSE.md"]
+authors = [{ name = "EdiFabric", email = "support@edifabric.com" }]
+keywords = ["edifabric", "x12", "edi", "hipaa", "837", "834", "json"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Topic :: Office/Business",
+    "Topic :: Software Development :: Libraries",
+]
+
+[project.urls]
+Homepage = "https://www.edifabric.com/edifabric-native.html"
+Documentation = "https://www.edifabric.com/docs/edifabric-native/introduction.html"
+Source = "https://github.com/EdiFabric/edifabric-python-bindings"
+License = "https://www.edifabric.com/files/eula.pdf"
+
+[tool.setuptools]
+packages = ["edifabric_x12"]
+
+[tool.setuptools.package-data]
+edifabric_x12 = ["edifabric-x12-tools.dll", "edifabric-x12-tools.so", "edifabric-x12-tools.dylib"]

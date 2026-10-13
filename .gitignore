@@ -1,3 +1,9 @@
-/__pycache__
+__pycache__/
 edifabric-x12-tools.dll
+edifabric-x12-tools.so
+edifabric-x12-tools.dylib
 edifabric.log
+/natives/
+/dist/
+/build/
+*.egg-info/
