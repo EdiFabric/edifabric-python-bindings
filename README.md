@@ -216,7 +216,7 @@ to the C runtime `free`.
 | --- | --- | --- |
 | Community | `set_serial` only | `set_serial` |
 | Developer | `set_serial` and `ensure_token` (`ensure_token` caches the result for 1 day) | `ensure_token` |
-| Enterprise | `set_serial`, `ensure_token`, `get_token` / `set_token` | `set_token` (offline tokens) |
+| Enterprise and Perpetual | `set_serial`, `ensure_token`, `get_token` / `set_token` | `set_token` (offline tokens) |
 
 ```python
 # Community: authorize per process against the license server
@@ -229,11 +229,13 @@ print(ef.get_token_expiration())   # .NET UTC ticks, 0 when unset
 # Developer (also works): same as Community, online check per process
 ef.set_serial(serial)
 
-# Enterprise (recommended): fetch / validate / set an offline token yourself
+# Enterprise and Perpetual (recommended): fetch / validate / set an offline token yourself
 token = ef.get_token(serial)
 ef.validate_token(token)
 ef.set_token(token)
 ```
+
+Self-service offline tokens last 30 days, so refresh them before they expire. If your hosts can't refresh a token, Enterprise can request a 1-year token and Perpetual a non-expiring token. Long-lived tokens are issued after the trial or evaluation period to registered companies using professional email addresses, and are non-refundable once issued. See [how to request one](https://www.edifabric.com/docs/faq/pricing-and-licensing-faqs.html#long-lived-tokens). Treat every token as a secret, and keep it out of source control.
 
 ## Model map
 
@@ -410,7 +412,7 @@ not on any searched path. Pass `ef.load_library("/path/to/library")` or set
 resets the map, so reload it afterwards.
 
 **Error 628 / 635 on parse** — authorize first: `set_serial` on Community,
-`ensure_token` (or `set_serial`) on Developer, or `set_token` on Enterprise.
+`ensure_token` (or `set_serial`) on Developer, or `set_token` on Enterprise or Perpetual.
 
 **Error 633 on ensure_token / get_token** — the plan's machine quota is used up.
 Contact support.
