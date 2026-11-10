@@ -267,9 +267,10 @@ def main() -> int:
             demo_logging("edifabric.log")
 
             try:
-                # The free and developer licenses do not support tokens. Authenticate only with serial.
-                ef.set_serial(serial)
-                print("  set_serial -> ok")
+                # ensure_token licenses the process on every plan: Community and the demo serial are checked
+                # online on every operation, and Developer, Enterprise and Perpetual get a cached token.
+                ef.ensure_token(serial, 3600)
+                print("  ensure_token -> ok")
                 
                 demo_set_local_map()
 

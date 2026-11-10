@@ -41,7 +41,7 @@ source distribution, because a package without the native library would not work
 ## Release
 
 1. Upload the new native build to `https://www.edifabric.com/download/`.
-2. Set `version` in `pyproject.toml` to the native library version, for example `1.1.1`, and
+2. Set `version` in `pyproject.toml` to the native library version, for example `1.2.0`, and
    commit.
 3. Publish to TestPyPI and check the install:
    - GitHub: **Actions > Publish to PyPI > Run workflow**, repository `testpypi`
@@ -51,10 +51,10 @@ source distribution, because a package without the native library would not work
    pip install --index-url https://test.pypi.org/simple/ edifabric-x12
    ```
 
-4. Create a GitHub release with the tag `v<version>`, for example `v1.1.1`. Publishing the
+4. Create a GitHub release with the tag `v<version>`, for example `v1.2.0`. Publishing the
    release runs the workflow against PyPI; the workflow fails if the tag and the version differ.
    Locally, the equivalent is `./scripts/release.ps1` or `scripts/release.sh`.
 
 To build without uploading, run `./scripts/release.ps1 -DryRun` or `scripts/release.sh --dry-run`.
-PyPI never accepts the same version twice, so a fix needs a new version, such as `1.1.1.post1`
+PyPI never accepts the same version twice, so a fix needs a new version, such as `1.2.0.post1`
 for a packaging-only change.

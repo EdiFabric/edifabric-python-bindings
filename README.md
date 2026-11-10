@@ -95,7 +95,7 @@ import edifabric_x12 as ef
 serial = "your-serial"   # from your Community or paid plan
 
 ef.load_library()                  # or ef.load_library(r"C:\libs\edifabric-x12-tools.dll")
-ef.set_serial(serial)              # Community: set_serial. Developer: prefer ensure_token. Enterprise: prefer set_token.
+ef.ensure_token(serial, 3600)       # every plan: license the process (see Licensing)
 ef.set_map(json.dumps({"default": serial, "maps": {}}))
 
 edi = open("purchase-order.edi", "rb").read()
@@ -212,28 +212,33 @@ to the C runtime `free`.
 > upgrade at [edifabric.com/pricing](https://www.edifabric.com/pricing.html) if you
 > want to continue.
 
-| Plan | What works | Recommended |
-| --- | --- | --- |
-| Community | `set_serial` only | `set_serial` |
-| Developer | `set_serial` and `ensure_token` (`ensure_token` caches the result for 1 day) | `ensure_token` |
-| Enterprise and Perpetual | `set_serial`, `ensure_token`, `get_token` / `set_token` | `set_token` (offline tokens) |
+**Use `ensure_token` on every plan.** Since ediFabric Native 1.2.0 it's the one licensing call for Community, Developer,
+Enterprise and Perpetual, in place of `set_serial`. Call it once at startup with your serial and the number of seconds a
+token must still be valid, and it keeps the process licensed from then on.
+
+| Plan | What `ensure_token` does |
+| --- | --- |
+| Community and the demo serial | Checks the serial online on every operation, as `set_serial` does |
+| Developer, Enterprise and Perpetual | Gets a token, caches it on disk and refreshes it before it expires, so operations are checked locally |
+
+The token cache is `%LOCALAPPDATA%\EdiFabric\tokens` on Windows, `~/Library/Caches/EdiFabric/tokens` on macOS, and
+`$XDG_CACHE_HOME/edifabric/tokens` (or `~/.cache/edifabric/tokens`) on Linux, so every process on the machine reuses
+the token. Set `EDIFABRIC_TOKEN_CACHE` to another folder, or to `none` to turn the cache off. When the license server
+can't be reached, a cached token that's still valid keeps working; without one, calls return [error 640](#error-codes).
 
 ```python
-# Community: authorize per process against the license server
-ef.set_serial(serial)
-
-# Developer (recommended): 1-day built-in cache; refreshes if the token expires within N seconds
+# Every plan (recommended): license the process; tokens are refreshed when they expire within N seconds
 ef.ensure_token(serial, 3600)
 print(ef.get_token_expiration())   # .NET UTC ticks, 0 when unset
 
-# Developer (also works): same as Community, online check per process
-ef.set_serial(serial)
-
-# Enterprise and Perpetual (recommended): fetch / validate / set an offline token yourself
+# Enterprise and Perpetual, when your hosts manage tokens themselves: fetch / validate / set an offline token
 token = ef.get_token(serial)
 ef.validate_token(token)
 ef.set_token(token)
 ```
+
+`set_serial` still works, but it checks the serial online on every operation, on every plan. `set_token` is for Enterprise and
+Perpetual hosts that fetch and distribute offline tokens themselves.
 
 Self-service offline tokens last 30 days, so refresh them before they expire. If your hosts can't refresh a token, Enterprise can request a 1-year token and Perpetual a non-expiring token. Long-lived tokens are issued after the trial or evaluation period to registered companies using professional email addresses, and are non-refundable once issued. See [how to request one](https://www.edifabric.com/docs/faq/pricing-and-licensing-faqs.html#long-lived-tokens). Treat every token as a secret, and keep it out of source control.
 
@@ -285,11 +290,9 @@ You can also mix both: keep `default` as your serial and add local entries under
 
 All X12 transactions, such as 837P, 834 and 850, are represented as ediFabric Native JSON models. The models are the same on every plan, Community or paid.
 
-**Standard models** come from the [EDI spec library](https://www.edifabric.com/specs/index.html), and you can download them without an account. Open the transaction, for example [837P](https://www.edifabric.com/specs/x12/hipaa/005010/837p.html), and on the **ediFabric Native** tab select **Download Native**.
+**Standard models** come from the [EDI spec library](https://www.edifabric.com/specs/index.html). Open the transaction, for example [837P](https://www.edifabric.com/specs/x12/hipaa/005010/837p.html), and under **Download** select **Native model**. Downloads need a free sign-in, as the Community plan is enough, and accepting the license agreement once; every plan includes 50 spec downloads a day. The specs the public examples use, such as 837P, 834, 835, 850 and 810, are a free sample that downloads without signing in. To parse, you don't need to download standard models at all: with `default` set to your serial, the engine gets them from the online spec service.
 
-![The Download Native button on the ediFabric Native tab of 837P in the EDI spec library](https://raw.githubusercontent.com/EdiFabric/edifabric-python-bindings/main/model.png)
-
-**Custom models** come from the [EDI Spec Builder](https://www.edifabric.com/spec-builder/index.html). When a trading partner changes the standard, open the transaction in the EDI spec library and select **Customize in Spec Builder**, or import your own OpenEDI file. Edit the OpenEDI schema until it matches the partner's guide and select **Update**. Then, on the **ediFabric Native** tab, select **Download Native**.
+**Custom models** come from the [EDI Spec Builder](https://www.edifabric.com/spec-builder/index.html), which you use signed in to your free account. When a trading partner changes the standard, open the transaction in the EDI spec library and select **Customize in Spec Builder**, or import your own OpenEDI file. Edit the OpenEDI schema until it matches the partner's guide and select **Update**. Then, on the **ediFabric Native** tab, select **Download Native**.
 
 ![The Download Native button on the ediFabric Native tab of a custom spec in the EDI Spec Builder](https://raw.githubusercontent.com/EdiFabric/edifabric-python-bindings/main/model-builder.png)
 
@@ -401,6 +404,7 @@ if you wish to continue.
 | 637 | Invalid JSON. Enable logging for additional details |
 | 638 | The operation is not supported by your license |
 | 639 | Community daily quota exceeded. Your license has reached its daily call limit. Upgrade your plan at edifabric.com to continue |
+| 640 | The license server can't be reached and no valid token is cached. Check the internet connection, firewall and proxy settings, and try again. Contact support@edifabric.com if this continues |
 
 ## Troubleshooting
 
@@ -411,8 +415,7 @@ not on any searched path. Pass `ef.load_library("/path/to/library")` or set
 **Error 615 on parse** — call `set_map` before parsing or splitting. `clear_cache`
 resets the map, so reload it afterwards.
 
-**Error 628 / 635 on parse** — authorize first: `set_serial` on Community,
-`ensure_token` (or `set_serial`) on Developer, or `set_token` on Enterprise or Perpetual.
+**Error 628 / 635 on parse** — license the process first with `ensure_token`, on any plan, or with `set_token` and an offline token.
 
 **Error 633 on ensure_token / get_token** — the plan's machine quota is used up.
 Contact support.
@@ -420,6 +423,10 @@ Contact support.
 **Error 639** — the Community (evaluation) daily quota was exceeded. Wait until
 the next day, or [upgrade your plan](https://www.edifabric.com/pricing.html) if
 you wish to continue.
+
+**Error 640** — the license server can't be reached and no valid token is cached. Check the
+internet connection, firewall and proxy settings. A cached token that's still valid keeps
+working, so this happens only before the first token, or after a token expired.
 
 ## Links
 
