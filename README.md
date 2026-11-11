@@ -240,7 +240,7 @@ ef.set_token(token)
 `set_serial` still works, but it checks the serial online on every operation, on every plan. `set_token` is for Enterprise and
 Perpetual hosts that fetch and distribute offline tokens themselves.
 
-Self-service offline tokens last 30 days, so refresh them before they expire. If your hosts can't refresh a token, Enterprise can request a 1-year token and Perpetual a non-expiring token. Long-lived tokens are issued after the trial or evaluation period to registered companies using professional email addresses, and are non-refundable once issued. See [how to request one](https://www.edifabric.com/docs/faq/pricing-and-licensing-faqs.html#long-lived-tokens). Treat every token as a secret, and keep it out of source control.
+Self-service offline tokens last 30 days, so refresh them before they expire. If your hosts can't refresh a token, Enterprise and Perpetual can request a 1-year token, and Perpetual gets a new one free every year, if approved. Long-lived tokens are issued after the trial or evaluation period to registered companies using professional email addresses, and are non-refundable once issued. See [how to request one](https://www.edifabric.com/docs/faq/pricing-and-licensing-faqs.html#long-lived-tokens). Treat every token as a secret, and keep it out of source control.
 
 ## Model map
 
