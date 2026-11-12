@@ -16,3 +16,7 @@ if loaded.parent != package:
     raise SystemExit(f"expected the bundled library in {package}, loaded {loaded}")
 print(f"loaded {loaded}")
 print(f"get_app_version -> {ef.get_app_version()}")
+
+# The license check uses OpenSSL on Linux, which loading alone doesn't.
+ef.ensure_token(os.environ.get("EDIFABRIC_SERIAL") or "bd96a836feca45cb91c86ee65d281f52", 3600)
+print("ensure_token -> ok")
