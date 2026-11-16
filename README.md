@@ -1,4 +1,6 @@
-# ediFabric Native X12 - Python bindings
+# ediFabric Native: X12 and HIPAA EDI parser for Python
+
+Parse, validate and generate **X12 EDI** and **HIPAA 5010** files in Python: convert X12 to JSON and JSON back to X12, validate 837 claims, 835 remittances, 834 enrollments, 270/271 eligibility, 850 purchase orders, 856 ship notices and 810 invoices, and generate 999 and 997 acknowledgments. Install with `pip install edifabric-x12`. It runs without an account on the demo serial key.
 
 **ediFabric Native** is a self-contained, high-performance X12 EDI native shared library. It converts X12 EDI to JSON (and back),
 validates transaction sets, and generates acknowledgments — callable from **any
